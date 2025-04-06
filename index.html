@@ -2,23 +2,29 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>一起长大</title>
     <style>
+        :root {
+            font-size: 16px;
+        }
+
         body {
             font-family: 'Microsoft YaHei', sans-serif;
-            line-height: 1.8;
+            line-height: 1.6;
             max-width: 760px;
             margin: 0 auto;
-            padding: 20px 20px 80px; /* 增加底部padding */
+            padding: 20px 20px 80px;
             background: #f5f9fa;
             color: #444;
-            font-size: 18px;
+            font-size: 1.125rem;
             position: relative;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .timeline {
             position: relative;
-            margin: 50px 0;
+            margin: 40px 0;
         }
 
         .timeline::before {
@@ -33,7 +39,7 @@
 
         .time-node {
             position: relative;
-            margin: 35px 0;
+            margin: 30px 0;
             padding-left: 50px;
         }
 
@@ -48,64 +54,59 @@
             border: 2px solid #e0f0f3;
         }
 
-         h1 {
+        h1 {
             text-align: center;
-            font-size: 2.8em;
+            font-size: 2.5rem;
             color: #6b9080;
-            margin: 40px 0;
+            margin: 30px 0;
             font-weight: 300;
-            letter-spacing: 3px;
+            letter-spacing: 2px;
         }
-
 
         .quote {
             font-style: italic;
             color: #777;
-            padding-left: 24px;
-            margin: 40px 0;
-           
+            padding-left: 1.5rem;
+            margin: 30px 0;
+            border-left: 3px solid #e0ecef;
         }
 
         .quote footer {
             color: #999;
             font-size: 0.9em;
-            margin-top: 8px;
+            margin-top: 12px;
         }
 
         .season {
             color: #6b9080;
-            font-size: 1.2em;
-            margin-bottom: 8px;
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            font-weight: 500;
         }
 
-        /* 新增音乐播放器样式 */
         #music-player {
             position: fixed;
             bottom: 20px;
             right: 20px;
-            width: 40px;
-            height: 40px;
+            width: 46px;
+            height: 46px;
             border-radius: 50%;
-            background: #9ab7ba url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24"><path fill="%23fff" d="M8 5v14l11-7z"/></svg>') no-repeat center;
+            background: #9ab7ba url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24"><path fill="%23fff" d="M8 5v14l11-7z"/></svg>') no-repeat center/60%;
             cursor: pointer;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-            transition: transform 0.3s ease;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.15);
+            transition: all 0.3s ease;
+            z-index: 100;
         }
 
         #music-player.playing {
             background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 24 24"><path fill="%23fff" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>');
         }
 
-        #music-player:hover {
-            transform: scale(1.08);
-        }
-
-        /* 新增底部导航样式 */
         .footer {
             text-align: center;
             color: #6b9080;
-            font-size: 0.9em;
-            margin: 60px 0 30px;
+            font-size: 0.95rem;
+            margin: 50px 0 30px;
             padding-top: 30px;
             border-top: 1px solid #e0ecef;
         }
@@ -114,15 +115,75 @@
             color: inherit;
             text-decoration: none;
             transition: color 0.3s ease;
-            margin: 0 12px;
+            margin: 0 10px;
+            white-space: nowrap;
         }
 
-        .footer a:hover {
-            color: #5a7c6f;
-            text-decoration: underline;
+        @media (max-width: 768px) {
+            :root {
+                font-size: 15px;
+            }
+
+            body {
+                padding: 15px 15px 70px;
+            }
+
+            h1 {
+                font-size: 2rem;
+                margin: 25px 0;
+            }
+
+            .timeline::before {
+                left: 14px;
+            }
+
+            .time-node {
+                padding-left: 40px;
+                margin: 25px 0;
+            }
+
+            .node-circle {
+                left: 8px;
+                width: 14px;
+                height: 14px;
+            }
+
+            #music-player {
+                width: 42px;
+                height: 42px;
+                bottom: 15px;
+                right: 15px;
+            }
+
+            .footer a {
+                display: inline-block;
+                margin: 5px 8px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 12px 12px 60px;
+                line-height: 1.5;
+            }
+
+            .season {
+                font-size: 1.1rem;
+            }
+
+            .quote {
+                padding-left: 1rem;
+                margin: 25px 0;
+            }
+
+            .footer {
+                font-size: 0.85rem;
+                padding-top: 20px;
+            }
         }
     </style>
 </head>
+
 <body>
     <h1>一 起 长 大</h1>
 
@@ -174,20 +235,34 @@
         <source src="music/Bandari-ChildhoodMemory.mp3" type="audio/mpeg">
     </audio>
 
-    <script>
-        // 音乐播放控制
+ <script>
+        // 优化音频播放逻辑
         const audio = document.getElementById('bgm');
         const player = document.getElementById('music-player');
+        let isFirstPlay = true;
 
         function togglePlay() {
+            if (isFirstPlay) {
+                audio.play().then(() => {
+                    player.classList.add('playing');
+                    isFirstPlay = false;
+                }).catch(e => console.log('播放需要用户交互'));
+                return;
+            }
+            
             audio.paused ? audio.play() : audio.pause();
             player.classList.toggle('playing');
         }
 
-        // 首次点击页面激活播放
-        document.body.addEventListener('click', function initPlay() {
-            audio.play().catch(() => {});
-            this.removeEventListener('click', initPlay);
+        // 兼容移动端音频自动播放
+        document.addEventListener('touchstart', function initPlay() {
+            if (isFirstPlay) {
+                audio.play().then(() => {
+                    audio.pause();
+                    isFirstPlay = false;
+                });
+                document.removeEventListener('touchstart', initPlay);
+            }
         }, { once: true });
     </script>
 </body>
